@@ -1,6 +1,5 @@
 package com.workers.ws_order.persistance.entity;
 
-import com.workers.ws_order.persistance.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,28 +13,28 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Entity
-@Table(name = "ws01_order", schema = "ws-order-management")
-public class OrderEntity {
+@Table(name = "ws01_order_photo", schema = "ws-order-management")
+public class OrderPhotoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "customer_id", nullable = false)
-    private Long customerId;
+    @Column(name = "order_id", nullable = false)
+    private Long orderId;
 
-    @Column(name = "category", nullable = false)
-    private String category;
+    @Lob
+    @Column(name = "photo_data", nullable = false)
+    private byte[] photoData;
 
-    @Column(name = "short_description", nullable = false)
-    private String shortDescription;
+    @Column(name = "file_name", nullable = false)
+    private String fileName;
 
-    @Column(name = "detailed_description")
-    private String detailedDescription;
+    @Column(name = "original_name", nullable = false)
+    private String originalName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private OrderStatus status;
+    @Column(name = "content_type", nullable = false)
+    private String contentType;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -44,4 +43,5 @@ public class OrderEntity {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
 }
