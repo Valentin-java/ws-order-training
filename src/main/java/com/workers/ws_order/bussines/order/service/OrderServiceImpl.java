@@ -3,24 +3,20 @@ package com.workers.ws_order.bussines.order.service;
 import com.workers.ws_order.bussines.order.interfaces.OrderService;
 import com.workers.ws_order.bussines.order.mapper.OrderMapper;
 import com.workers.ws_order.persistance.entity.OrderEntity;
-import com.workers.ws_order.persistance.entity.OrderPhotoEntity;
 import com.workers.ws_order.persistance.enums.OrderStatus;
-import com.workers.ws_order.persistance.repository.OrderPhotoRepository;
 import com.workers.ws_order.persistance.repository.OrderRepository;
 import com.workers.ws_order.rest.Inbound.dto.createorder.OrderCreateRequestDto;
 import com.workers.ws_order.rest.Inbound.dto.createorder.OrderCreateResponseDto;
 import com.workers.ws_order.rest.Inbound.dto.getorder.OrderSummaryDto;
+import com.workers.ws_order.rest.Inbound.dto.updateorder.OrderUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Slf4j
@@ -30,54 +26,22 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
-    private final OrderPhotoRepository orderPhotoRepository;
+    private OrderEntity order;
 
     @Override
+    @Transactional
     public OrderCreateResponseDto createOrder(OrderCreateRequestDto requestDto) {
 
         log.info("Creating a new order for customer ID: {}", requestDto.customerId());
 
-        // Шаг 1: Создание сущности заказа
-        OrderEntity orderEntity = createOrderEntity(requestDto);
-
-        // Шаг 2: Сохранение заказа в базе данных
-        orderEntity = orderRepository.save(orderEntity);
-
-        // Шаг 3: Сохранение фотографий заказа
-        saveOrderWithPhotos(requestDto.photoData(), orderEntity);
-
-        // Шаг 4: Формирование и возврат ответа
-        OrderCreateResponseDto responseDto = mapToResponseDto(orderEntity);
-
-        log.info("Order created successfully with ID: {}", responseDto.orderId());
-        return responseDto;
+        var orderEntity = orderRepository.save(createOrderEntity(requestDto));
+        return orderMapper.toResponseDto(orderEntity);
     }
-
 
     private OrderEntity createOrderEntity(OrderCreateRequestDto requestDto) {
         OrderEntity orderEntity = orderMapper.toEntity(requestDto);
         orderEntity.setStatus(OrderStatus.NEW);
         return orderEntity;
-    }
-
-    private void saveOrderWithPhotos(List<MultipartFile> photoDataList, OrderEntity orderEntity) {
-        photoDataList.forEach(photoData -> {
-            OrderPhotoEntity photoEntity = new OrderPhotoEntity();
-            photoEntity.setOrderId(orderEntity.getId());
-            photoEntity.setFileName(photoData.getName());
-            photoEntity.setOriginalName(photoData.getOriginalFilename());
-            photoEntity.setContentType(photoData.getContentType());
-            try {
-                photoEntity.setPhotoData(photoData.getBytes());
-            } catch (IOException e) {
-                throw new ResponseStatusException(BAD_REQUEST, "Error was occurred while read photo with order id: " + orderEntity.getId());
-            }
-            orderPhotoRepository.save(photoEntity);
-        });
-    }
-
-    private OrderCreateResponseDto mapToResponseDto(OrderEntity orderEntity) {
-        return orderMapper.toResponseDto(orderEntity);
     }
 
     @Override
@@ -92,11 +56,62 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<OrderSummaryDto> getCompletedAndCancelledOrdersByCustomerId(Long customerId) {
+        log.info("etching completed and cancelled orders for customer ID: {}", customerId);
+        return orderRepository.findByCustomerIdAndStatusIn(customerId, List.of(OrderStatus.COMPLETED, OrderStatus.CANCELLED))
+                .stream()
+                .map(orderMapper::toSummaryDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public OrderCreateResponseDto getOrderDetailsById(Long orderId) {
-        log.info("Fetching new details for order ID: {}", orderId);
+        log.info("Fetching details for order ID: {}", orderId);
         return orderRepository.findById(orderId)
                 .map(orderMapper::toResponseDto)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found with ID: " + orderId));
+    }
 
+    @Override
+    @Transactional
+    public OrderCreateResponseDto updateOrder(Long orderId, OrderUpdateRequestDto requestDto) {
+        log.info("Updating order with ID: {}", orderId);
+
+        OrderEntity orderEntity = findOrderById(orderId);
+        updateOrderFields(orderEntity, requestDto);
+        orderEntity = saveOrder(orderEntity);
+        return orderMapper.toResponseDto(orderEntity);
+    }
+
+
+    private OrderEntity findOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found with ID: " + orderId));
+    }
+
+    private void updateOrderFields(OrderEntity orderEntity, OrderUpdateRequestDto requestDto) {
+        orderMapper.updateOrderFromDto(requestDto, orderEntity);
+    }
+
+    private OrderEntity saveOrder(OrderEntity orderEntity) {
+        return orderRepository.save(orderEntity);
+    }
+
+    @Override
+    @Transactional
+    public void completeOrder(Long orderId, Long specialistId) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found with ID: " + orderId));
+        // BidEntity acceptedBid = bidRepository.findFirstByOrderIdAndStatus(orderId, BidStatus.ACCEPTED);
+        //  if (acceptedBid == null || !acceptedBid.getSpecialistId().equals(specialistId)) {
+        //      throw new ResponseStatusException(BAD_REQUEST, "Only the specialist with the accepted bid can complete the order");
+        //  }
+        order.setStatus(OrderStatus.COMPLETED);
+        orderRepository.save(order);
+        log.info("Order with ID: {} has been marked as completed by specialist ID: {}", orderId, specialistId);
     }
 }
+
+
+

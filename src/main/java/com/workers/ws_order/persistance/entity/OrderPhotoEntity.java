@@ -33,8 +33,8 @@ public class OrderPhotoEntity {
     @Column(name = "original_name", nullable = false)
     private String originalName;
 
-    @Column(name = "content_type", nullable = false)
-    private String contentType;
+    @Column(name = "file_type",nullable = false)
+    private String fileType;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
