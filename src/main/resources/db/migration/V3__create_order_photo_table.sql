@@ -1,10 +1,9 @@
-CREATE TABLE IF NOT EXISTS "ws-order-management"."ws01_order_photo"(
+CREATE TABLE IF NOT EXISTS "ws-order-management"."ws01_bid"(
     id BIGSERIAL NOT NULL,
     order_id BIGINT NOT NULL,
-    photo_data BYTEA NOT NULL,
-    file_name VARCHAR(255) NOT NULL,
-    original_name VARCHAR(255) NOT NULL,
-    file_type VARCHAR(100) NOT NULL,
+    specialist_id BIGINT NOT NULL,
+    price NUMERIC(10, 2) NOT NULL,
+    status VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)

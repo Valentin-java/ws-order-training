@@ -1,13 +1,13 @@
-package com.workers.ws_order.bussines.order.service;
+package com.workers.ws_order.bussines.order.customer.service;
 
-import com.workers.ws_order.bussines.order.interfaces.OrderService;
-import com.workers.ws_order.bussines.order.mapper.OrderMapper;
-import com.workers.ws_order.persistance.entity.OrderEntity;
+import com.workers.ws_order.bussines.order.customer.interfaces.OrderCustomerService;
+import com.workers.ws_order.bussines.order.customer.mapper.OrderMapper;
 import com.workers.ws_order.persistance.enums.OrderStatus;
 import com.workers.ws_order.persistance.repository.OrderRepository;
 import com.workers.ws_order.rest.Inbound.dto.createorder.OrderCreateRequestDto;
 import com.workers.ws_order.rest.Inbound.dto.createorder.OrderCreateResponseDto;
 import com.workers.ws_order.rest.Inbound.dto.getorder.OrderSummaryDto;
+import com.workers.ws_order.rest.Inbound.dto.updateorder.OrderChangeStatusByCustomer;
 import com.workers.ws_order.rest.Inbound.dto.updateorder.OrderUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,31 +17,28 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+import static com.workers.ws_order.persistance.enums.OrderStatus.CANCELLED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OrderServiceImpl implements OrderService {
+public class OrderCustomerServiceImpl implements OrderCustomerService {
 
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
-    private OrderEntity order;
 
     @Override
     @Transactional
     public OrderCreateResponseDto createOrder(OrderCreateRequestDto requestDto) {
-
         log.info("Creating a new order for customer ID: {}", requestDto.customerId());
 
-        var orderEntity = orderRepository.save(createOrderEntity(requestDto));
-        return orderMapper.toResponseDto(orderEntity);
-    }
-
-    private OrderEntity createOrderEntity(OrderCreateRequestDto requestDto) {
-        OrderEntity orderEntity = orderMapper.toEntity(requestDto);
+        var orderEntity = orderMapper.toEntity(requestDto);
         orderEntity.setStatus(OrderStatus.NEW);
-        return orderEntity;
+
+        orderEntity = orderRepository.save(orderEntity);
+
+        return orderMapper.toResponseDto(orderEntity);
     }
 
     @Override
@@ -57,8 +54,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderSummaryDto> getCompletedAndCancelledOrdersByCustomerId(Long customerId) {
-        log.info("etching completed and cancelled orders for customer ID: {}", customerId);
-        return orderRepository.findByCustomerIdAndStatusIn(customerId, List.of(OrderStatus.COMPLETED, OrderStatus.CANCELLED))
+        log.info("Fetching completed and cancelled orders for customer ID: {}", customerId);
+        return orderRepository.findByCustomerIdAndStatusIn(customerId, List.of(OrderStatus.COMPLETED, CANCELLED))
                 .stream()
                 .map(orderMapper::toSummaryDto)
                 .toList();
@@ -78,38 +75,24 @@ public class OrderServiceImpl implements OrderService {
     public OrderCreateResponseDto updateOrder(Long orderId, OrderUpdateRequestDto requestDto) {
         log.info("Updating order with ID: {}", orderId);
 
-        OrderEntity orderEntity = findOrderById(orderId);
-        updateOrderFields(orderEntity, requestDto);
-        orderEntity = saveOrder(orderEntity);
+        var orderEntity = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found with ID: " + orderId));
+
+        orderMapper.updateOrderFromDto(requestDto, orderEntity);
+        orderEntity = orderRepository.save(orderEntity);
+
         return orderMapper.toResponseDto(orderEntity);
     }
 
-
-    private OrderEntity findOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found with ID: " + orderId));
-    }
-
-    private void updateOrderFields(OrderEntity orderEntity, OrderUpdateRequestDto requestDto) {
-        orderMapper.updateOrderFromDto(requestDto, orderEntity);
-    }
-
-    private OrderEntity saveOrder(OrderEntity orderEntity) {
-        return orderRepository.save(orderEntity);
-    }
-
     @Override
-    @Transactional
-    public void completeOrder(Long orderId, Long specialistId) {
-        OrderEntity order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found with ID: " + orderId));
-        // BidEntity acceptedBid = bidRepository.findFirstByOrderIdAndStatus(orderId, BidStatus.ACCEPTED);
-        //  if (acceptedBid == null || !acceptedBid.getSpecialistId().equals(specialistId)) {
-        //      throw new ResponseStatusException(BAD_REQUEST, "Only the specialist with the accepted bid can complete the order");
-        //  }
-        order.setStatus(OrderStatus.COMPLETED);
-        orderRepository.save(order);
-        log.info("Order with ID: {} has been marked as completed by specialist ID: {}", orderId, specialistId);
+    public void cancelOrder(OrderChangeStatusByCustomer request) {
+        log.info("Cancel order with ID: {}", request.orderId());
+
+        var orderEntity = orderRepository.findById(request.orderId())
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found with ID: " + request.orderId()));
+
+        orderEntity.setStatus(CANCELLED);
+        orderRepository.save(orderEntity);
     }
 }
 

@@ -1,4 +1,4 @@
-package com.workers.ws_order.bussines.order.mapper;
+package com.workers.ws_order.bussines.order.customer.mapper;
 
 import com.workers.ws_order.config.mapper.MapperConfiguration;
 import com.workers.ws_order.persistance.entity.OrderEntity;
@@ -34,7 +34,8 @@ public interface OrderMapper {
     @Mapping(target = "customerId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    void updateOrderFromDto(OrderUpdateRequestDto dto, @MappingTarget OrderEntity entity);
+    @Mapping(target = "status", ignore = true)
+    void updateOrderFromDto(OrderUpdateRequestDto source, @MappingTarget OrderEntity target);
 
     @Named("mapCategoryToDescription")
     default String mapCategoryToDescription(Integer categoryCode) {
