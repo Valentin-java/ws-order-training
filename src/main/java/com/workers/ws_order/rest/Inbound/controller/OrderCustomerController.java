@@ -1,9 +1,10 @@
 package com.workers.ws_order.rest.Inbound.controller;
 
-import com.workers.ws_order.bussines.order.interfaces.OrderService;
+import com.workers.ws_order.bussines.order.customer.interfaces.OrderCustomerService;
 import com.workers.ws_order.rest.Inbound.dto.createorder.OrderCreateRequestDto;
 import com.workers.ws_order.rest.Inbound.dto.createorder.OrderCreateResponseDto;
 import com.workers.ws_order.rest.Inbound.dto.getorder.OrderSummaryDto;
+import com.workers.ws_order.rest.Inbound.dto.updateorder.OrderChangeStatusByCustomer;
 import com.workers.ws_order.rest.Inbound.dto.updateorder.OrderUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +15,9 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/order")
-public class OrderController {
+public class OrderCustomerController {
 
-    private final OrderService service;
+    private final OrderCustomerService service;
 
     @PostMapping("/create")
     public ResponseEntity<?> createOrder(@RequestBody OrderCreateRequestDto requestDto) {
@@ -28,14 +29,14 @@ public class OrderController {
         return ResponseEntity.ok(service.getNewOrdersByCustomerId(customerId));
     }
 
-    @GetMapping("/{orderId}")
-    public ResponseEntity<OrderCreateResponseDto> getOrderDetailsById(@PathVariable Long orderId) {
-        return ResponseEntity.ok(service.getOrderDetailsById(orderId));
-    }
-
     @GetMapping("/archive")
     public ResponseEntity<List<OrderSummaryDto>> getCompletedAndCancelledOrdersByCustomerId(@RequestParam Long customerId) {
         return ResponseEntity.ok(service.getCompletedAndCancelledOrdersByCustomerId(customerId));
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderCreateResponseDto> getOrderDetailsById(@PathVariable Long orderId) {
+        return ResponseEntity.ok(service.getOrderDetailsById(orderId));
     }
 
     @PostMapping("/update/{orderId}")
@@ -43,11 +44,9 @@ public class OrderController {
         return ResponseEntity.ok(service.updateOrder(orderId, requestDto));
     }
 
-    @PostMapping("/{orderId}/complete/{specialistId}")
-    public ResponseEntity<?> completeOrder(@PathVariable Long orderId, @PathVariable Long specialistId) {
-        service.completeOrder(orderId, specialistId);
+    @PostMapping("/cancel")
+    public ResponseEntity<Void> cancelOrder(@RequestBody OrderChangeStatusByCustomer request) {
+        service.cancelOrder(request);
         return ResponseEntity.ok().build();
     }
-
-
 }

@@ -4,10 +4,11 @@ import com.workers.ws_order.bussines.photofiles.interfaces.OrderPhotoService;
 import com.workers.ws_order.bussines.photofiles.mapper.OrderPhotoMapper;
 import com.workers.ws_order.persistance.repository.OrderPhotoRepository;
 import com.workers.ws_order.rest.Inbound.dto.common.model.FileDto;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -46,7 +47,7 @@ public class OrderPhotoServiceImpl implements OrderPhotoService {
      * @param orderId
      */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<FileDto> loadFiles(Long orderId) {
         return Optional.ofNullable(orderPhotoRepository.findByOrderId(orderId))
                 .map(photoList -> photoList.stream().map(orderPhotoMapper::toDomain).toList())
@@ -59,7 +60,7 @@ public class OrderPhotoServiceImpl implements OrderPhotoService {
      * @param photoData
      */
     @Override
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public void updateOrderPhotos(Long orderId, List<MultipartFile> photoData) {
         orderPhotoRepository.deleteAllByOrderId(orderId);
         saveOrderPhotos(photoData, orderId);
