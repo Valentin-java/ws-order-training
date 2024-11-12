@@ -1,7 +1,7 @@
 package com.workers.ws_order.rest.Inbound.controller;
 
 import com.workers.ws_order.bussines.order.handyman.interfaces.OrderHandymanService;
-import com.workers.ws_order.rest.Inbound.dto.updateorder.OrderChangeStatusByHandyman;
+import com.workers.ws_order.rest.Inbound.dto.order.updateorder.OrderChangeStatusByHandyman;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

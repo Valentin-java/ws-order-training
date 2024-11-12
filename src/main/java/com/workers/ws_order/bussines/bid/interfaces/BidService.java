@@ -1,9 +1,9 @@
 package com.workers.ws_order.bussines.bid.interfaces;
 
-import com.workers.ws_order.rest.Inbound.dto.bidstatus.BidChangeStatusRequest;
-import com.workers.ws_order.rest.Inbound.dto.createbid.BidCreateRequestDto;
-import com.workers.ws_order.rest.Inbound.dto.createbid.BidCreateResponseDto;
-import com.workers.ws_order.rest.Inbound.dto.getbid.BidSummaryDto;
+import com.workers.ws_order.rest.Inbound.dto.bid.bidstatus.BidChangeStatusRequest;
+import com.workers.ws_order.rest.Inbound.dto.bid.createbid.BidCreateRequestDto;
+import com.workers.ws_order.rest.Inbound.dto.bid.createbid.BidCreateResponseDto;
+import com.workers.ws_order.rest.Inbound.dto.bid.getbid.BidSummaryDto;
 
 import java.util.List;
 

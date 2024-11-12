@@ -1,4 +1,4 @@
-package com.workers.ws_order.rest.Inbound.dto.updateorder;
+package com.workers.ws_order.rest.Inbound.dto.order.updateorder;
 
 import com.workers.ws_order.persistance.enums.OrderStatus;
 

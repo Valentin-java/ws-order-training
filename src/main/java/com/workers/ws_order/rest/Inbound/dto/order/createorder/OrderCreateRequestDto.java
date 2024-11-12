@@ -1,4 +1,4 @@
-package com.workers.ws_order.rest.Inbound.dto.createorder;
+package com.workers.ws_order.rest.Inbound.dto.order.createorder;
 
 import java.math.BigDecimal;
 
