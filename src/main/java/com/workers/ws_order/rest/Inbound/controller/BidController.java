@@ -1,10 +1,10 @@
 package com.workers.ws_order.rest.Inbound.controller;
 
 import com.workers.ws_order.bussines.bid.interfaces.BidService;
-import com.workers.ws_order.rest.Inbound.dto.bidstatus.BidChangeStatusRequest;
-import com.workers.ws_order.rest.Inbound.dto.createbid.BidCreateRequestDto;
-import com.workers.ws_order.rest.Inbound.dto.createbid.BidCreateResponseDto;
-import com.workers.ws_order.rest.Inbound.dto.getbid.BidSummaryDto;
+import com.workers.ws_order.rest.Inbound.dto.bid.bidstatus.BidChangeStatusRequest;
+import com.workers.ws_order.rest.Inbound.dto.bid.createbid.BidCreateRequestDto;
+import com.workers.ws_order.rest.Inbound.dto.bid.createbid.BidCreateResponseDto;
+import com.workers.ws_order.rest.Inbound.dto.bid.getbid.BidSummaryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

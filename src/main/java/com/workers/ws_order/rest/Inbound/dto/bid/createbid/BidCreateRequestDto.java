@@ -1,4 +1,4 @@
-package com.workers.ws_order.rest.Inbound.dto.createbid;
+package com.workers.ws_order.rest.Inbound.dto.bid.createbid;
 
 import java.math.BigDecimal;
 

@@ -2,12 +2,14 @@ package com.workers.ws_order.bussines.bid.service;
 
 import com.workers.ws_order.bussines.bid.interfaces.BidService;
 import com.workers.ws_order.bussines.bid.mapper.BidMapper;
+import com.workers.ws_order.bussines.message.Interfaces.MessageService;
 import com.workers.ws_order.persistance.entity.BidEntity;
 import com.workers.ws_order.persistance.repository.BidRepository;
-import com.workers.ws_order.rest.Inbound.dto.bidstatus.BidChangeStatusRequest;
-import com.workers.ws_order.rest.Inbound.dto.createbid.BidCreateRequestDto;
-import com.workers.ws_order.rest.Inbound.dto.createbid.BidCreateResponseDto;
-import com.workers.ws_order.rest.Inbound.dto.getbid.BidSummaryDto;
+import com.workers.ws_order.rest.Inbound.dto.bid.bidstatus.BidChangeStatusRequest;
+import com.workers.ws_order.rest.Inbound.dto.bid.createbid.BidCreateRequestDto;
+import com.workers.ws_order.rest.Inbound.dto.bid.createbid.BidCreateResponseDto;
+import com.workers.ws_order.rest.Inbound.dto.bid.getbid.BidSummaryDto;
+import com.workers.ws_order.rest.Inbound.dto.messege.createmsg.MessageCreateRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +29,7 @@ public class BidServiceImpl implements BidService {
 
     private final BidMapper bidMapper;
     private final BidRepository bidRepository;
-    //private final MessageService messageService;
+    private final MessageService messageService;
 
     @Override
     @Transactional
@@ -42,10 +44,10 @@ public class BidServiceImpl implements BidService {
         bidEntity.setStatus(NEW);
         bidEntity = bidRepository.save(bidEntity);
 
-//        messageService.sendMessege(bidEntity.getId(), new MessageCreateRequestDto(
-//                bidEntity.getSpecialistId(),
-//                requestDto.message()
-//        ));
+       messageService.sendMessage(bidEntity.getId(), new MessageCreateRequestDto(
+               bidEntity.getSpecialistId(),
+                requestDto.message()
+        ));
 
         return bidMapper.toResponseDto(bidEntity);
     }

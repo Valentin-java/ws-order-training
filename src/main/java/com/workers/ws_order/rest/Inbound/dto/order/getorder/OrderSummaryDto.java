@@ -1,13 +1,11 @@
-package com.workers.ws_order.rest.Inbound.dto.createorder;
+package com.workers.ws_order.rest.Inbound.dto.order.getorder;
 
 import java.time.LocalDateTime;
 
-public record OrderCreateResponseDto(
+public record OrderSummaryDto(
         Long orderId,
-        Long customerId,
         String category,
         String shortDescription,
-        String detailedDescription,
         String status,
         LocalDateTime createdAt
 ) {

@@ -8,7 +8,7 @@ import com.workers.ws_order.persistance.enums.OrderStatus;
 import com.workers.ws_order.persistance.repository.BidRepository;
 import com.workers.ws_order.persistance.repository.OrderRepository;
 import com.workers.ws_order.persistance.repository.custom.OrderPageableCustomRepository;
-import com.workers.ws_order.rest.Inbound.dto.updateorder.OrderChangeStatusByHandyman;
+import com.workers.ws_order.rest.Inbound.dto.order.updateorder.OrderChangeStatusByHandyman;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
